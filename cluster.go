@@ -68,6 +68,9 @@ type ClusterOptions struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
+	// PoolFIFO uses FIFO mode for each node connection pool GET/PUT (default LIFO).
+	PoolFIFO bool
+
 	// PoolSize applies per cluster node and not for the whole cluster.
 	PoolSize           int
 	MinIdleConns       int
@@ -91,7 +94,7 @@ func (opt *ClusterOptions) init() {
 	}
 
 	if opt.PoolSize == 0 {
-		opt.PoolSize = 5 * runtime.NumCPU()
+		opt.PoolSize = 5 * runtime.GOMAXPROCS(0)
 	}
 
 	switch opt.ReadTimeout {
@@ -146,6 +149,7 @@ func (opt *ClusterOptions) clientOptions() *Options {
 		ReadTimeout:  opt.ReadTimeout,
 		WriteTimeout: opt.WriteTimeout,
 
+		PoolFIFO:           opt.PoolFIFO,
 		PoolSize:           opt.PoolSize,
 		MinIdleConns:       opt.MinIdleConns,
 		MaxConnAge:         opt.MaxConnAge,
